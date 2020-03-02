@@ -58,6 +58,7 @@ interface QuestionOptions extends ButtonOptions {
   questionText: ConstOrContextFunc<string>;
   setFunc: (ctx: ContextMessageUpdate, answer: string | undefined) => Promise<void> | void;
   uniqueIdentifier: string;
+  extraMarkup?: any;
 }
 
 interface SelectPaginationOptions {
@@ -242,7 +243,7 @@ export default class TelegrafInlineMenu {
   }
 
   question(text: ConstOrContextFunc<string>, action: string, additionalArgs: QuestionOptions): TelegrafInlineMenu {
-    const {questionText, uniqueIdentifier, setFunc, hide} = additionalArgs
+    const {questionText, uniqueIdentifier, setFunc, hide, extraMarkup = Markup.forceReply()} = additionalArgs
     assert(questionText, 'questionText is not set. set it')
     assert(setFunc, 'setFunc is not set. set it')
     assert(uniqueIdentifier, 'uniqueIdentifier is not set. set it')
@@ -263,7 +264,7 @@ export default class TelegrafInlineMenu {
       const questionTextString = typeof questionText === 'function' ? await questionText(ctx) : questionText
       const qText = signQuestionText(questionTextString, uniqueIdentifier)
 
-      const extra = Extra.markdown().markup(Markup.forceReply())
+      const extra = Extra.markdown().markup(extraMarkup.forceReply())
       await Promise.all([
         ctx.reply(qText, extra as any),
         ctx.answerCbQuery(),
